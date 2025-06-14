@@ -119,7 +119,7 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header" style={{ marginTop: 38, marginBottom: 62 }}>
+      <header className="App-header" style={{ marginTop: '38.2vh', marginBottom: 0, textAlign: 'center' }}>
         <h1 style={{ marginBottom: 0 }}>CycloScope</h1>
         <p style={{ marginTop: 4, marginBottom: 0 }}>Interactive Cyclostationary Signal Processing Explorer</p>
       </header>
