@@ -14,6 +14,7 @@ function App() {
 
   // Basic controls
   const [preset, setPreset] = useState<PresetOption>('Custom');
+  const [waveformType, setWaveformType] = useState<PresetOption>('Pure Sine');
   const [frequency, setFrequency] = useState(5);
   const [amplitude, setAmplitude] = useState(1);
   const [modFreq, setModFreq] = useState(2);
@@ -33,6 +34,7 @@ function App() {
   // Handle preset selection
   const handlePresetChange = (p: PresetOption) => {
     setPreset(p);
+    setWaveformType(p);
     if (p === 'Custom') return;
     // Set slider values for each preset
     switch (p) {
@@ -56,10 +58,10 @@ function App() {
     }
   };
 
-  // Generate signal based on preset
+  // Generate signal based on waveformType (not preset)
   const signal = useMemo(() => {
     const N = sampleRate * duration;
-    switch (preset) {
+    switch (waveformType) {
       case 'Pure Sine':
         return Array.from({ length: N }, (_, i) => amplitude * Math.sin(2 * Math.PI * frequency * (i / sampleRate)));
       case 'AM':
@@ -110,21 +112,16 @@ function App() {
         });
       case 'Custom':
       default:
-        return Array.from({ length: N }, (_, i) => {
-          const t = i / sampleRate;
-          const mod = 1 + modDepth * Math.sin(2 * Math.PI * modFreq * t);
-          const carrier = amplitude * Math.sin(2 * Math.PI * frequency * t);
-          const noise = noiseLevel * (2 * Math.random() - 1);
-          return mod * carrier + noise;
-        });
+        // Default to last waveformType (should not hit 'Custom' here)
+        return Array.from({ length: N }, (_, i) => amplitude * Math.sin(2 * Math.PI * frequency * (i / sampleRate)));
     }
-  }, [preset, sampleRate, duration, frequency, amplitude, modFreq, modDepth, noiseLevel]);
+  }, [waveformType, sampleRate, duration, frequency, amplitude, modFreq, modDepth, noiseLevel]);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>CycloScope</h1>
-        <p>Interactive Cyclostationary Signal Processing Explorer</p>
+      <header className="App-header" style={{ marginTop: 38, marginBottom: 62 }}>
+        <h1 style={{ marginBottom: 0 }}>CycloScope</h1>
+        <p style={{ marginTop: 4, marginBottom: 0 }}>Interactive Cyclostationary Signal Processing Explorer</p>
       </header>
       <main>
         <SignalControls
