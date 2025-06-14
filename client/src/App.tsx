@@ -118,11 +118,33 @@ function App() {
   }, [waveformType, sampleRate, duration, frequency, amplitude, modFreq, modDepth, noiseLevel]);
 
   return (
-    <div className="App">
-      <header className="App-header" style={{ margin: 0, padding: 0, textAlign: 'center', height: '120px', position: 'relative' }}>
-        <h1 style={{ marginBottom: 0, paddingTop: '38.2%' }}>CycloScope</h1>
-        <p style={{ marginTop: 4, marginBottom: 0 }}>Interactive Cyclostationary Signal Processing Explorer</p>
-      </header>
+    <div className="App" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{
+          width: '100%',
+          background: '#23272f',
+          minHeight: '40vh',
+          maxHeight: '60vh',
+          height: '50vh',
+          margin: 0,
+          padding: 0,
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: '30%',
+            left: 0,
+            width: '100%',
+            textAlign: 'center',
+            color: 'white',
+          }}
+        >
+          <h1 style={{ marginBottom: 0, fontWeight: 700, fontSize: '2.5rem' }}>CycloScope</h1>
+          <p style={{ marginTop: 4, marginBottom: 0, fontSize: '1.2rem' }}>Interactive Cyclostationary Signal Processing Explorer</p>
+        </div>
+      </div>
       <main>
         <SignalControls
           preset={preset}
