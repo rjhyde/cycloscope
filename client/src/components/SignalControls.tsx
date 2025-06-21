@@ -27,6 +27,8 @@ interface SignalControlsProps {
   alpha: number;
   setAlpha: (v: number) => void;
   sampleRate: number;
+  duration: number;
+  setDuration: (v: number) => void;
 }
 
 const sliderStyle: React.CSSProperties = {
@@ -51,6 +53,7 @@ const SignalControls: React.FC<SignalControlsProps> = ({
   noiseLevel, setNoiseLevel,
   alpha, setAlpha,
   sampleRate,
+  duration, setDuration,
 }) => (
   <div
     style={{
@@ -105,6 +108,10 @@ const SignalControls: React.FC<SignalControlsProps> = ({
     <label style={labelStyle}>
       α: {alpha} Hz
       <input type="range" min="0" max={sampleRate / 2} step="0.1" value={alpha} onChange={e => setAlpha(Number(e.target.value))} style={sliderStyle} />
+    </label>
+    <label style={labelStyle}>
+      Duration: {duration} seconds
+      <input type="range" min="1" max="10" value={duration} onChange={e => setDuration(Number(e.target.value))} style={sliderStyle} />
     </label>
   </div>
 );

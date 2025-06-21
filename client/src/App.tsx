@@ -6,11 +6,11 @@ import SpectralCorrelationPlaceholder from './components/SpectralCorrelationPlac
 import CyclicAutocorrelationPlot from './components/CyclicAutocorrelationPlot';
 import SCFSlicePlot from './components/SCFSlicePlot';
 import SignalControls, { PresetOption } from './components/SignalControls';
-import SpectralCorrelationHeatmap from './components/SpectralCorrelationHeatmap';
+import CyclicDomainProfile from './components/SpectralCorrelationHeatmap';
 
 function App() {
   const sampleRate = 1000;
-  const duration = 1;
+  const [duration, setDuration] = useState(1);
 
   // Basic controls
   const [preset, setPreset] = useState<PresetOption>('Custom');
@@ -30,6 +30,7 @@ function App() {
   const setModDepthCustom = (v: number) => { setPreset('Custom'); setModDepth(v); };
   const setNoiseLevelCustom = (v: number) => { setPreset('Custom'); setNoiseLevel(v); };
   const setAlphaCustom = (v: number) => { setPreset('Custom'); setAlpha(v); };
+  const setDurationCustom = (v: number) => { setPreset('Custom'); setDuration(v); };
 
   // Handle preset selection
   const handlePresetChange = (p: PresetOption) => {
@@ -83,25 +84,27 @@ function App() {
       case 'Sum of Sines':
         return Array.from({ length: N }, (_, i) => amplitude * (Math.sin(2 * Math.PI * frequency * (i / sampleRate)) + 0.7 * Math.sin(2 * Math.PI * (frequency / 2) * (i / sampleRate))));
       case 'BPSK': {
-        // Simple BPSK: random bits, NRZ, modulate carrier
-        const bitRate = 2; // bits/sec
+        // Generate many bits for proper CSP analysis (Dr. Spooner's feedback)
+        const bitRate = 10; // bits/sec - higher rate for more bits in the signal
         const samplesPerBit = Math.floor(sampleRate / bitRate);
-        const bits = Array.from({ length: Math.ceil(N / samplesPerBit) }, () => (Math.random() > 0.5 ? 1 : -1));
+        const numBits = Math.ceil(N / samplesPerBit);
+        const bits = Array.from({ length: numBits }, () => (Math.random() > 0.5 ? 1 : -1));
         return Array.from({ length: N }, (_, i) => {
           const bit = bits[Math.floor(i / samplesPerBit)];
           return amplitude * bit * Math.sin(2 * Math.PI * frequency * (i / sampleRate));
         });
       }
       case 'QPSK': {
-        // Simple QPSK: random symbols, modulate carrier
-        const bitRate = 2;
-        const samplesPerBit = Math.floor(sampleRate / bitRate);
-        const symbols = Array.from({ length: Math.ceil(N / samplesPerBit) }, () => {
+        // Generate many symbols for proper CSP analysis  
+        const symbolRate = 5; // symbols/sec
+        const samplesPerSymbol = Math.floor(sampleRate / symbolRate);
+        const numSymbols = Math.ceil(N / samplesPerSymbol);
+        const symbols = Array.from({ length: numSymbols }, () => {
           const phase = Math.PI / 4 + (Math.floor(Math.random() * 4) * Math.PI / 2);
           return phase;
         });
         return Array.from({ length: N }, (_, i) => {
-          const phase = symbols[Math.floor(i / samplesPerBit)];
+          const phase = symbols[Math.floor(i / samplesPerSymbol)];
           return amplitude * Math.sin(2 * Math.PI * frequency * (i / sampleRate) + phase);
         });
       }
@@ -156,6 +159,7 @@ function App() {
           noiseLevel={noiseLevel} setNoiseLevel={setNoiseLevelCustom}
           alpha={alpha} setAlpha={setAlphaCustom}
           sampleRate={sampleRate}
+          duration={duration} setDuration={setDurationCustom}
         />
         {/* Plots */}
         <section>
@@ -166,13 +170,30 @@ function App() {
               <TimeDomainPlot signal={signal} sampleRate={sampleRate} />
             </div>
             <div style={{marginBottom: '1em'}}>
-              <h3>Frequency-Domain (FFT)</h3>
+              <h3>Frequency-Domain Spectrum</h3>
               <FrequencyDomainPlot signal={signal} sampleRate={sampleRate} />
             </div>
             <div style={{marginBottom: '1em'}}>
               <label>
                 Cyclic Frequency α: {alpha} Hz
-                <input type="range" min="0" max={sampleRate / 2} step="0.1" value={alpha} onChange={e => setAlphaCustom(Number(e.target.value))} style={{ width: 200, marginLeft: 8 }} />
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="50" 
+                  step="0.5" 
+                  value={alpha} 
+                  onChange={e => setAlphaCustom(Number(e.target.value))} 
+                  style={{ width: 300, marginLeft: 8 }} 
+                />
+                <input 
+                  type="number" 
+                  min="0" 
+                  max="50" 
+                  step="0.1" 
+                  value={alpha} 
+                  onChange={e => setAlphaCustom(Number(e.target.value))} 
+                  style={{ width: 80, marginLeft: 8, padding: 4 }}
+                />
               </label>
             </div>
             <div style={{marginBottom: '1em'}}>
@@ -182,7 +203,8 @@ function App() {
               <SCFSlicePlot signal={signal} sampleRate={sampleRate} alpha={alpha} maxLag={maxLag} />
             </div>
             <div style={{marginBottom: '1em'}}>
-              <SpectralCorrelationHeatmap signal={signal} sampleRate={sampleRate} maxLag={50} nAlpha={32} nFreq={64} alpha={alpha} />
+              <h3>Cyclic Domain Profile</h3>
+              <CyclicDomainProfile signal={signal} sampleRate={sampleRate} maxLag={maxLag} nAlpha={32} nFreq={64} alpha={alpha} />
             </div>
           </div>
         </section>
